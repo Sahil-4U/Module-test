@@ -72,7 +72,7 @@ app.get('/login',(req,res)=>{
     res.render('login')
 })
 //dashboard route
-app.get('/dashboard',(req,res)=>{
+app.get('/dashboard',isAuth,(req,res)=>{
     res.render('dashboard')
 })
 
