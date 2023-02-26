@@ -5,13 +5,17 @@ const bcrypt=require('bcrypt');
 const validator=require('validator');
 const session=require('express-session');
 const mongodbSession=require('connect-mongodb-session')(session);
+const jwt=require('jsonwebtoken');
 
 const app=express();
 
 
 //file exports
 const userSchema=require('./Modles/UserSchema');
-const { cleanUpAndValidate, generateJwtToken, sendverificationToken } = require('./Utils/AuthUtils');
+const { cleanUpAndValidate, 
+    generateJwtToken, 
+    sendverificationToken, 
+    secretKey } = require('./Utils/AuthUtils');
 const { isAuth } = require('./Middleware/authmiddleware');
 
 //mongodb connection
@@ -84,7 +88,7 @@ app.post("/register",async (req,res)=>{
         try{
             userH=await userSchema.findOne({email});
         }catch(err){
-            console.log(err+"line no 57");
+            console.log(err);
             return res.send({
                 status:400,
                 message:"database error",
@@ -107,13 +111,14 @@ app.post("/register",async (req,res)=>{
         });
         //here i create token for 2fa
         const token=generateJwtToken(email);
+        console.log(token);
         try{
             const userdb=await user.save();
             sendverificationToken(email,token);
             console.log(userdb);
             return res.status(200).redirect("/login");
         }catch(error){
-            console.log(error+" error at line no=82");
+            console.log(error);
             return res.send({
                 status:400,
                 message:"error in saving data at db from register form ",
@@ -121,7 +126,7 @@ app.post("/register",async (req,res)=>{
             })
         }
     }catch(error){
-        console.log(error+" at line no=85");
+        console.log(error);
         return res.send({
             status:400,
             message:"error with cleanupandvalidate function",
@@ -130,6 +135,29 @@ app.post("/register",async (req,res)=>{
     }
 });
 
+
+//i am checking here is email authenticated or not
+app.get("/verify/:token",(req,res)=>{
+    const token=req.params.token;
+    jwt.verify(token,secretKey,async (err,decodedData)=>{
+        if(err) throw err;
+        console.log(decodedData);
+        try {
+            const userauth=await userSchema.findOneAndUpdate(
+                {email:decodedData.email},
+                {emailAuth:true}
+            );
+            console.log(userauth);
+            return res.status(200).redirect('/login');
+        } catch (error) {
+            return res.send({
+                status:400,
+                message:"error in 2fa",
+                error:error,
+            })
+        }
+    });
+})
 //login route
 app.post('/login',async (req,res)=>{
     console.log(req.body);
@@ -158,10 +186,19 @@ app.post('/login',async (req,res)=>{
         }else{
             isUser=await userSchema.findOne({username:loginId});
         }
+        console.log(isUser);
         if(!isUser){
             return res.send({
                 status:400,
                 message:"user not exist",
+            })
+        };
+        //i implement a check here for email authenticate
+        if(!isUser.emailAuth){
+            console.log(isUser.emailAuth);
+            return res.send({
+                status:400,
+                message:"please verify email first",
             })
         };
         //validate password is correct or not
@@ -181,7 +218,7 @@ app.post('/login',async (req,res)=>{
         }
         return res.status(200).redirect('dashboard')
     }catch(error){
-        console.log(error+" error at line 131");
+        console.log(error);
         return res.send({
             status:400,
             message:"User is not exist",

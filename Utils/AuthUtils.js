@@ -20,9 +20,9 @@ const cleanUpAndValidate = ({ name, email, username, password }) => {
         res();
     })
 }
-const secrestKey = "This is module test";
+const secretKey = "This is module test";
 const generateJwtToken = (email) => {
-    const jwtToken = jwt.sign({ email: email }, secrestKey, { expiresIn: "15d" });
+    const jwtToken = jwt.sign({ email: email }, secretKey, { expiresIn: "15d" });
     return jwtToken;
 }
 const sendverificationToken = (email, token) => {
@@ -49,4 +49,4 @@ const sendverificationToken = (email, token) => {
     })
 }
 
-module.exports = { cleanUpAndValidate, generateJwtToken, sendverificationToken };
+module.exports = { cleanUpAndValidate, generateJwtToken, sendverificationToken,secretKey };
