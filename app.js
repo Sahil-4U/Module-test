@@ -17,6 +17,7 @@ const { cleanUpAndValidate,
     sendverificationToken, 
     secretKey } = require('./Utils/AuthUtils');
 const { isAuth } = require('./Middleware/authmiddleware');
+const rateLimiting = require('./Middleware/ratelimiting');
 
 //mongodb connection
 const uri='mongodb+srv://Sahil:9992@cluster0.7dhdonx.mongodb.net/moduleTest';
@@ -228,7 +229,7 @@ app.post('/login',async (req,res)=>{
 });
 
 //dashboard route
-app.post('/dashboard',isAuth,(req,res)=>{
+app.post('/dashboard',isAuth,rateLimiting,(req,res)=>{
   console.log(req.body);
   return res.send('this is dashboard');
 })
