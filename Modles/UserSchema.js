@@ -20,7 +20,7 @@ const userSchema = new Schema({
         require: true,
     },
     emailAuth: {
-        type: String,
+        type:Boolean,
         require: true,
         default: false,
     },
