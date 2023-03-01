@@ -233,7 +233,38 @@ app.post('/dashboard',isAuth,rateLimiting,(req,res)=>{
   console.log(req.body);
   return res.send('this is dashboard');
 })
-
+//route for changing password
+app.post('/changePassword',isAuth,async(req,res)=>{
+    // console.log(req.body);
+    const newPassword=req.body.Newval;
+    console.log(newPassword);
+    const id=req.session.user.userId;
+    console.log(id);
+    try{
+        const db=await userSchema.findOne({_id:id});
+        const hashPassword=await bcrypt.hash(newPassword,saltround);
+        console.log(db);
+        try{
+            const updatedpass=await userSchema.findOneAndUpdate({_id:id},{password:hashPassword});
+            console.log(updatedpass);
+            return res.status(200).redirect('login');
+        }catch(err){
+            console.log(err);
+            return res.send({
+                status:400,
+                message:"error in updating password",
+                err:err,
+            })
+        }
+    }catch(err){
+        console.log(err);
+        return res.send({
+            status:400,
+            message:"user not exist",
+            err:err,
+        })
+    }
+})
 //start our port
 app.listen(PORT, () => {
     console.log(clc.yellow("server is started"));
