@@ -3,38 +3,90 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Simple To-Do App</title>
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+      <title>Inventory Management</title>
+    
+    <style>
+      body{
+        box-sizing: border-box;
+        background-color: black;
+      }
+      .heading{
+        color: white;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 700;
+      }
+      hr{
+        background-color: white;
+      }
+      .form-container{
+        display: flex;
+        justify-content:space-evenly;
+      }
+      input{
+        height: 50px;
+        width: 250px;
+        border: none;
+        outline: none;
+        border-radius: 6%;
+      }
+      input::placeholder{
+        text-align:left;
+        font-size:20px;
+        opacity: .3;
+      }
+      .button{
+        margin-top: 18px;
+        width:100px;
+        height: 50px;
+        border-radius: 10%;
+        border: none;
+        outline: none;
+        background-color: blue;
+        color: white;
+      }
+      .form{
+        margin: 2%;
+      }
+      h2{
+        color: white;
+        font-size: 52px;
+        word-spacing: 5px;
+        font-weight: 800;
+      }
+      </style>
     </head>
     <body>
       <div class="container">
-        <h1 class="display-4 text-center py-1">Books App</h1>
-        
-        <div class="jumbotron p-3 shadow-sm">
-          <form id="create_form">
-            <div class="d-flex align-items-center">
-              <input id="create_field" name='todo' autofocus autocomplete="off" class="form-control mr-3" type="text" style="flex: 1;">
-              <button class="add_item btn btn-primary">Add New Item</button>
+        <h1 class="heading">Inventory Management</h1>
+        <hr>
+        <div class="form">
+          <form action='/dashboard' method="POST">
+            <div class="form-container">
+             <div class="text-boxes">
+              <label for="title" class="heading">Title</label><br>
+              <input  name="title"  autofocus autocomplete="off" placeholder="Enter Title here"  type="text" required>
+             </div>
+             <div class="text-boxes">
+              <label for="author" class="heading">Author</label><br>
+              <input  autofocus autocomplete="off" name="author" placeholder="Enter Author name" type="text" required>
+             </div>
+             <div class="text-boxes">
+              <label for="price" class="heading">Price</label><br>
+              <input  autofocus autocomplete="off" name="price" placeholder="Enter price" type="number" required>
+             </div>
+             <div class="text-boxes">
+              <label for="category" class="heading">Category</label><br>
+              <input  autofocus autocomplete="off" name="category" placeholder="Enter category"  type="text" required>
+             </div>
+              <button class="button" type="submit">Add Book</button>
             </div>
           </form>
         </div>
-        <ul id="item_list" class=""list-group pb-5>
+        <hr>
+        <h2>All Books</h2>
+        <ul id="item_list">
          
         </ul>
-        <button class="show_more">
-          Show More
-        </button>
-        <br/>
-        <br/>
-
-      <form action='/logout' method="POST">
-        <button> Logout <button>
-      </form>
-
-      <form action='/logout_from_all_devices' method="POST">
-        <button> Logout from all devices <button>
-      </form>
-
       </div>
       <script  src="https://unpkg.com/axios/dist/axios.min.js"> </script>
       <script src="/browser.js"></script>

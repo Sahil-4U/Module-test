@@ -83,7 +83,7 @@ app.get('/resendVerificationMail',(req,res)=>{
 })
 //dashboard route
 app.get('/dashboard',isAuth,(req,res)=>{
-    res.render('dashboard')
+    res.render('dashboard');
 })
 
 //salt round variable
@@ -333,7 +333,7 @@ app.post('/resendVerificationMail',async(req,res)=>{
 })
 
 //dashboard route
-app.post('/dashboard',isAuth,rateLimiting,(req,res)=>{
+app.post('/dashboard',isAuth,(req,res)=>{
   console.log(req.body);
   return res.send('this is dashboard');
 })
