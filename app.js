@@ -18,6 +18,8 @@ const { cleanUpAndValidate,
     secretKey } = require('./Utils/AuthUtils');
 const { isAuth } = require('./Middleware/authmiddleware');
 const rateLimiting = require('./Middleware/ratelimiting');
+const UserSchema = require('./Modles/UserSchema');
+const { up } = require('cli-color/move');
 
 //mongodb connection
 const uri='mongodb+srv://Sahil:9992@cluster0.7dhdonx.mongodb.net/moduleTest';
@@ -70,6 +72,10 @@ app.get('/register',(req,res)=>{
 //login route
 app.get('/login',(req,res)=>{
     res.render('login')
+})
+//Change password route
+app.get('/forgotPasswordPage',(req,res)=>{
+    res.render('forgotPasswordPage')
 })
 //dashboard route
 app.get('/dashboard',isAuth,(req,res)=>{
@@ -227,44 +233,86 @@ app.post('/login',async (req,res)=>{
         })
     }
 });
+//route for forget password
+app.post('/forgetPassword',async(req,res)=>{
+    console.log(req.body);
+    const {loginId,oldpassword,newpassword}=req.body;
+
+    //validate our data is to be correct or not 
+    if (!loginId || !oldpassword || !newpassword) {
+        return res.send({
+            status: 405,
+            message: `<h2>missing credentials</h2>`,
+        })
+    }
+    if (typeof loginId !== "string" || typeof oldpassword !== "string" || typeof newpassword !== "string") {
+        return res.send({
+            status: 400,
+            message: "invalid credentials",
+        })
+    }
+    //identifing the data is user send email or username
+    try{
+        let isUser;
+        //we use here validator's is isEmail method to check loginId is email or username
+        if(validator.isEmail('loginId')){
+            isUser=await userSchema.findOne({email:loginId});
+        }else{
+            isUser=await userSchema.findOne({username:loginId});
+        }
+        console.log(isUser);
+        if(!isUser){
+            return res.send({
+                status:400,
+                message:"user not exist",
+            })
+        };
+        //i implement a check here for email authenticate
+        if(!isUser.emailAuth){
+            console.log(isUser.emailAuth);
+            return res.send({
+                status:400,
+                message:"please verify email first",
+            })
+        };
+        //validate password is correct or not
+        const isMatch=await bcrypt.compare(oldpassword,isUser.password);
+        if(!isMatch){
+            return res.send({
+                status:400,
+                message:'Password is not matched',
+            })
+        }
+        try{
+            const hashPassword=await bcrypt.hash(newpassword,saltround);
+            const update=await userSchema.findOneAndUpdate({username:loginId},{password:hashPassword});
+            // const update=await userSchema.findOne({username:loginId});
+            // console.log("update function "+update);
+        }catch(error){
+            return res.status({
+                status:400,
+                message:"error in db while changing  the password",
+                error:error,
+            })
+        }
+        return res.status(200).redirect('login')
+    }catch(error){
+        console.log(error);
+        return res.send({
+            status:400,
+            message:"User is not exist",
+            error:error,
+        })
+    }
+})
 
 //dashboard route
 app.post('/dashboard',isAuth,rateLimiting,(req,res)=>{
   console.log(req.body);
   return res.send('this is dashboard');
 })
-//route for changing password
-app.post('/changePassword',isAuth,async(req,res)=>{
-    // console.log(req.body);
-    const newPassword=req.body.Newval;
-    console.log(newPassword);
-    const id=req.session.user.userId;
-    console.log(id);
-    try{
-        const db=await userSchema.findOne({_id:id});
-        const hashPassword=await bcrypt.hash(newPassword,saltround);
-        console.log(db);
-        try{
-            const updatedpass=await userSchema.findOneAndUpdate({_id:id},{password:hashPassword});
-            console.log(updatedpass);
-            return res.status(200).redirect('login');
-        }catch(err){
-            console.log(err);
-            return res.send({
-                status:400,
-                message:"error in updating password",
-                err:err,
-            })
-        }
-    }catch(err){
-        console.log(err);
-        return res.send({
-            status:400,
-            message:"user not exist",
-            err:err,
-        })
-    }
-})
+
+
 //start our port
 app.listen(PORT, () => {
     console.log(clc.yellow("server is started"));
