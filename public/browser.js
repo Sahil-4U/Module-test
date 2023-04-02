@@ -36,3 +36,6 @@
   function forgotPassword(){
     window.location.href='/forgotPasswordPage';
   }
+  function resendVerificationMail(){
+    window.location.href='/resendVerificationMail';
+  }

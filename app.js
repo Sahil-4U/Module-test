@@ -77,6 +77,10 @@ app.get('/login',(req,res)=>{
 app.get('/forgotPasswordPage',(req,res)=>{
     res.render('forgotPasswordPage')
 })
+//resend Verification Mail
+app.get('/resendVerificationMail',(req,res)=>{
+    res.render('resendVerificationMail');
+})
 //dashboard route
 app.get('/dashboard',isAuth,(req,res)=>{
     res.render('dashboard')
@@ -118,11 +122,11 @@ app.post("/register",async (req,res)=>{
         });
         //here i create token for 2fa
         const token=generateJwtToken(email);
-        console.log(token);
+        // console.log(token);
         try{
             const userdb=await user.save();
             sendverificationToken(email,token);
-            console.log(userdb);
+            // console.log(userdb);
             return res.status(200).redirect("/login");
         }catch(error){
             console.log(error);
@@ -148,13 +152,13 @@ app.get("/verify/:token",(req,res)=>{
     const token=req.params.token;
     jwt.verify(token,secretKey,async (err,decodedData)=>{
         if(err) throw err;
-        console.log(decodedData);
+        // console.log(decodedData);
         try {
             const userauth=await userSchema.findOneAndUpdate(
                 {email:decodedData.email},
                 {emailAuth:true}
             );
-            console.log(userauth);
+            // console.log(userauth);
             return res.status(200).redirect('/login');
         } catch (error) {
             return res.send({
@@ -202,7 +206,7 @@ app.post('/login',async (req,res)=>{
         };
         //i implement a check here for email authenticate
         if(!isUser.emailAuth){
-            console.log(isUser.emailAuth);
+            // console.log(isUser.emailAuth);
             return res.send({
                 status:400,
                 message:"please verify email first",
@@ -303,6 +307,28 @@ app.post('/forgetPassword',async(req,res)=>{
             message:"User is not exist",
             error:error,
         })
+    }
+})
+app.post('/resendVerificationMail',async(req,res)=>{
+    console.log(req.body);
+    const {loginId}=req.body;
+    if(validator.isEmail(loginId)){
+        //here i create token for 2fa
+        const token=generateJwtToken(loginId);
+        // console.log(token);
+        try{
+            sendverificationToken(loginId,token);
+            return res.status(200).redirect("/login");
+        }catch(error){
+            console.log(error);
+            return res.send({
+                status:400,
+                message:"error in resend varification mail",
+                error:error,
+            })
+        }
+    }else{
+        return res.send(`<center><h2>!!!!!!!!!!!!!!!<br>(-----Please provide a valid email address-----)</h2></center>`)
     }
 })
 
