@@ -41,7 +41,7 @@ const sendverificationToken = (email, token) => {
         from: "Module-Test",
         to: email,
         subject: "Email verification for module-test",
-        html: `click<a href="http://localhost:8000/verify/${token}">Here</a>`,
+        html: `click<a href="https://module-test.onrender.com/verify/${token}">Here</a>`,
     }
     mailer.sendMail(mailOptions, function (error, response) {
         if (error) throw error;
